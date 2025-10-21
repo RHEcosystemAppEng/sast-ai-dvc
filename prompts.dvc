@@ -1,0 +1,6 @@
+outs:
+- md5: 6edc898520471d9ef0e33cb1bf143425.dir
+  size: 12027
+  nfiles: 1
+  hash: md5
+  path: prompts

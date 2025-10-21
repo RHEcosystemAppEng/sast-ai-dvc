@@ -1,0 +1,5 @@
+outs:
+- md5: 2121a9a81068124b6642d625ce993007
+  size: 149
+  hash: md5
+  path: testing-data-nvrs.yaml
