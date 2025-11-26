@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sast-ai-dvc
+  labels:
+    app: sast-ai-dvc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sast-ai-dvc
+  template:
+    metadata:
+      labels:
+        app: sast-ai-dvc
+    spec:
+      containers:
+      - name: sast-ai-dvc
+        # Update this with your registry path
+        image: quay.io/ecosystem-appeng/sast-ai-dvc:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: sast-ai-sast-ai-dvc-s3-credentials
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sast-ai-dvc-s3-credentials
+              key: AWS_SECRET_ACCESS_KEY
+        - name: GIT_REPO_URL
+          valueFrom:
+            secretKeyRef:
+              name: sast-ai-dvc-s3-credentials
+              key: GIT_REPO_URL
+        - name: LOG_LEVEL
+          value: "info"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sast-ai-dvc
+spec:
+  selector:
+    app: sast-ai-dvc
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: sast-ai-dvc
+spec:
+  to:
+    kind: Service
+    name: sast-ai-dvc
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
