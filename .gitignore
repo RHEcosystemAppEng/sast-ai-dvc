@@ -1,4 +1,41 @@
+# DVC realted data
 /ground_truth_sheets
 /known-non-issues-el10
 /prompts
 /testing-data-nvrs.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# DVC
+/dvc.lock
+.dvc/tmp
+.dvc/cache
+
+# Environment & Secrets
+.env
+deploy/secret.yaml
+
+# Test outputs
+test_output/
+*.err
+*-ignore.err
+v1.yaml
+v2.yaml

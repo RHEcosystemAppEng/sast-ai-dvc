@@ -1,136 +1,94 @@
-# sast-ai-dvc
+# DVC Data Repository
 
-Data Version Control (DVC) repository for SAST AI workflow data.
+Version-controlled data storage using DVC with S3/MinIO backend.
 
-## Overview
+## How It Works
 
-This repository uses:
-- **Git** for code and metadata versioning
-- **Git tags** for version releases
-- **DVC** for large file storage and versioning
+```mermaid
+sequenceDiagram
+    participant User
+    participant API as API Server
+    participant Git as Git Repository
+    participant S3 as S3 / MinIO
 
-## Prerequisites
-
-```bash
-# Install DVC with S3 support
-pip install dvc dvc-s3
+    User->>API: GET /file?path=prompts/file.yaml&rev=v2.0
+    API->>Git: Fetch .dvc files at revision v2.0
+    Git-->>API: Return .dvc tracking info (file hash)
+    API->>S3: Fetch actual data by hash
+    S3-->>API: Return file content
+    API-->>User: Return file content
 ```
 
-## 1. Versioning with Git Tags
+**What's stored where:**
 
-We use Git tags to mark specific versions of the repository and its data.
+| Location | What | Example |
+|----------|------|---------|
+| **Git** | DVC config + tracking files | `.dvc/config`, `prompts.dvc` |
+| **S3/MinIO** | Actual data files | prompts, known-non-issues, etc. |
 
-### View available versions
-```bash
-git tag
-```
-
-### Create a new version
-```bash
-# After making changes and committing
-git tag v1.1.0
-git push origin v1.1.0
-```
-
-### Checkout a specific version
-```bash
-git checkout v1.0.0
-```
-
-## 2. Pushing a New Version with DVC
-
-When you have new or updated data:
+## Using DVC CLI
 
 ```bash
-# 1. Add/update your data files
-# (DVC is already tracking them)
-
-# 2. Push data to DVC remote storage
-dvc push
-
-# 3. Commit the updated .dvc files
-git add *.dvc
-git commit -m "Update data for version X.X.X"
-
-# 4. Create and push a new version tag
-git tag vX.X.X
-git push origin main
-git push origin vX.X.X
-```
-
-## 3. Clone Everything with DVC
-
-To get the complete repository with all data:
-
-```bash
-# 1. Clone the Git repository
-git clone <repository-url>
-cd dvc-repo
-
-# 2. Pull all DVC-tracked data
+# Pull all data
 dvc pull
+
+# Get specific file
+dvc get . known-non-issues-el10/adcli/ignore.err -o ./ignore.err
+
+# Get at specific revision
+dvc get . prompts/sast-ai-prompts.yaml --rev v2.0.0 -o ./prompts.yaml
 ```
 
-### Clone a specific version
+## Using API Server
+
+### Run Locally
 ```bash
-# Clone and checkout a specific tag
-git clone <repository-url>
-cd dvc-repo
-git checkout v1.0.0
-dvc pull
+cd app
+pip install -r requirements.txt
+
+export GIT_REPO_URL=https://github.com/your-org/dvc-repo.git
+export AWS_ACCESS_KEY_ID=your-key
+export AWS_SECRET_ACCESS_KEY=your-secret
+
+python main.py
 ```
 
-## 4. Get a Single File with DVC
-
-To download just one specific file without cloning the entire repository:
-
+### Endpoints
 ```bash
-# Download a single file to current directory
-dvc get . path/to/file
+# Get file
+curl http://localhost:8000/known-non-issues-el10/adcli
+curl "http://localhost:8000/file?path=prompts/sast-ai-prompts.yaml&rev=v2.0"
 
-# Download to a specific location
-dvc get . path/to/file -o ./where-to-put-file
+# Check exists
+curl "http://localhost:8000/exists?path=prompts/sast-ai-prompts.yaml"
 
-# Download from a specific version/tag
-dvc get . path/to/file --rev v1.0.0 -o ./output-file
+# Health
+curl http://localhost:8000/health
 ```
 
-### Examples
-
+### Deploy to OpenShift
 ```bash
-# Get a specific ground truth sheet
-dvc get . ground_truth_sheets/acl-2.3.2-1.el10.xlsx -o ./acl.xlsx
-
-# Get known non-issues for a specific package
-dvc get . known-non-issues-el10/acl/ignore.err -o ./acl-ignore.err
-
-# Get from a specific version
-dvc get . config.yaml --rev v1.0.0 -o ./config-v1.0.yaml
+cd app/deploy
+# Edit secret.yaml with: GIT_REPO_URL, AWS credentials
+oc apply -f secret.yaml
+oc apply -f deployment.yaml
 ```
 
 ## Repository Structure
 
 ```
-.
-├── config.yaml                  # Configuration file
-├── ground_truth_sheets/         # DVC-tracked: Ground truth data
-├── known-non-issues-el10/       # DVC-tracked: Known non-issues
-├── prompts/                     # DVC-tracked: AI prompts
-├── testing-data-nvrs.yaml       # DVC-tracked: Test data
-└── *.dvc                        # DVC metadata files
+├── .dvc/config                # S3/MinIO connection config
+├── known-non-issues-el10.dvc  # Tracks known-non-issues data
+├── prompts.dvc                # Tracks prompts data
+├── ground_truth_sheets.dvc    # Tracks ground truth data
+└── app/                       # API server code
 ```
 
-## DVC Remote Storage
+## Configuration
 
-DVC data is stored in MinIO S3-compatible storage. Configuration is in `.dvc/config`.
+| Variable | Description |
+|----------|-------------|
+| `GIT_REPO_URL` | Git repository URL (required) |
+| `AWS_ACCESS_KEY_ID` | S3 access key (required) |
+| `AWS_SECRET_ACCESS_KEY` | S3 secret key (required) |
 
-## Troubleshooting
-
-### Connection issues
-Ensure you have access to the DVC remote storage endpoint. You may need VPN access.
-
-### Missing dvc-s3
-If you get "No module named 'dvc_s3'":
-```bash
-pip install dvc-s3
-```
