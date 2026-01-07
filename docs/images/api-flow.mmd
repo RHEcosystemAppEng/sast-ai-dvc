@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant User
+    participant API as API Server
+    participant Git as Git Repository
+    participant S3 as S3 / MinIO
+
+    User->>API: GET /file?path=prompts/file.yaml&rev=v2.0
+    API->>Git: Fetch .dvc files at revision v2.0
+    Git-->>API: Return .dvc tracking info (file hash)
+    API->>S3: Fetch actual data by hash
+    S3-->>API: Return file content
+    API-->>User: Return file content
+
