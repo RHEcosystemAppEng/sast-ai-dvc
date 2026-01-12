@@ -63,11 +63,9 @@ When building AI systems, you often deal with **large files** that slow down Git
 
 ---
 
-## 🚀 Getting Started
+## 🚀 How to Use
 
-### Option 1: Using the DVC CLI (For Data Engineers & Contributors)
-
-Best for: Downloading data locally, adding new data, updating existing files.
+### Using DVC CLI
 
 ```bash
 # Clone the repository
@@ -84,9 +82,7 @@ dvc get . known-non-issues-el10/adcli/ignore.err -o ./ignore.err
 dvc get . prompts/sast-ai-prompts.yaml --rev v2.0.0 -o ./prompts.yaml
 ```
 
-### Option 2: Using the API Server (For Applications & Services)
-
-Best for: Other services that need to fetch data programmatically without installing DVC.
+### Using the API Server
 
 ```bash
 # Get known non-issues for a package
@@ -97,9 +93,6 @@ curl http://localhost:8000/prompts/sast-ai-prompts.yaml
 
 # Get file at specific version
 curl "http://localhost:8000/file?path=prompts/sast-ai-prompts.yaml&rev=v2.0"
-
-# Check if a file exists
-curl "http://localhost:8000/exists?path=prompts/sast-ai-prompts.yaml"
 
 # Health check
 curl http://localhost:8000/health
