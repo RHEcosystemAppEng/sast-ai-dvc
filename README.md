@@ -6,7 +6,7 @@
 
 ## 📖 What is This Repository?
 
-This repository serves as the **central data hub** for our SAST-AI (Static Application Security Testing with AI) project. Instead of scattering large data files across different systems or embedding them directly in application code, we maintain them here with full version control.
+This repository serves as the **central data hub** for the [SAST-AI-Workflow](https://github.com/RHEcosystemAppEng/sast-ai-workflow) project (Static Application Security Testing with AI).
 
 ### Data We Manage
 
