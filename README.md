@@ -8,6 +8,8 @@
 
 This repository serves as the **central data hub** for the [SAST-AI-Workflow](https://github.com/RHEcosystemAppEng/sast-ai-workflow) project (Static Application Security Testing with AI).
 
+> **Note:** This repository contains only DVC metadata/pointer files (`.dvc` files). The actual data files are stored in S3/MinIO remote storage.
+
 ### Data We Manage
 
 | Dataset | Purpose |
