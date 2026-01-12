@@ -10,34 +10,11 @@ This repository serves as the **central data hub** for the [SAST-AI-Workflow](ht
 
 > **Note:** This repository contains only DVC metadata/pointer files (`.dvc` files). The actual data files are stored in S3/MinIO remote storage.
 
-### Data We Manage
+### Why DVC?
 
-| Dataset | Purpose |
-|---------|---------|
-| **Prompts** | AI prompt templates used by the SAST-AI-Workflow project |
-| **Known Non-Issues** | Curated lists of false positives per package — prevents the AI from flagging known safe patterns |
-| **Ground Truth Sheets** | Validated security findings used for training and evaluation |
-| **Testing Data (NVRs)** | Package Name-Version-Release data for testing |
+When building AI systems, you often deal with **large files** that slow down Git, **frequently changing data** that needs version history, and **data & code synchronization** challenges.
 
----
-
-## 🤔 Why DVC? The Problem We're Solving
-
-### The Challenge
-
-When building AI systems, you often deal with:
-- **Large files** that slow down Git repositories
-- **Frequently changing data** that needs version history
-- **Data & code synchronization** — ensuring the right model uses the right prompts/data
-
-Git is amazing for code, but it wasn't designed for large binary files or datasets. Storing large files in Git leads to:
-- 🐌 Slow clone/pull operations
-- 💾 Bloated repository size
-- 🔄 No efficient diffing for binary files
-
-### The Solution: DVC (Data Version Control)
-
-**DVC** extends Git to handle data files. Think of it as "Git for Data."
+**DVC (Data Version Control)** extends Git to handle data files. Think of it as "Git for Data."
 
 ![DVC Architecture](docs/images/dvc-architecture.png)
 
@@ -62,11 +39,14 @@ Git is amazing for code, but it wasn't designed for large binary files or datase
 </tr>
 </table>
 
-**Key Benefits:**
-- ✅ **Version Control for Data** — Track changes, rollback, compare versions
-- ✅ **Lightweight Git Repo** — Only small `.dvc` pointer files in Git
-- ✅ **Remote Storage** — Actual data lives in S3/MinIO (scalable, cheap)
-- ✅ **Reproducibility** — Lock exact data versions with Git tags
+### Data We Manage
+
+| Dataset | Purpose |
+|---------|---------|
+| **Prompts** | AI prompt templates used by the SAST-AI-Workflow project |
+| **Known Non-Issues** | Curated lists of false positives per package — prevents the AI from flagging known safe patterns |
+| **Ground Truth Sheets** | Validated security findings used for training and evaluation |
+| **Testing Data (NVRs)** | Package Name-Version-Release data for testing |
 
 ---
 
