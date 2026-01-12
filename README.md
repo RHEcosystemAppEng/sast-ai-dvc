@@ -65,6 +65,18 @@ When building AI systems, you often deal with **large files** that slow down Git
 
 ## 🚀 How to Use
 
+### Prerequisites
+
+Install [DVC](https://dvc.org/doc/install) (Data Version Control):
+
+```bash
+# Using pip
+pip install dvc[s3]
+
+# Or using Homebrew (macOS)
+brew install dvc
+```
+
 ### Using DVC CLI
 
 ```bash
