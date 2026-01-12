@@ -143,27 +143,6 @@ See [app/deploy/README.md](app/deploy/README.md) for detailed deployment instruc
 
 ---
 
-## 📁 Repository Structure
-
-```
-sast-ai-dvc/
-├── .dvc/
-│   └── config                 # S3/MinIO connection settings
-│
-├── known-non-issues-el10.dvc  # Tracks: package-specific false positive lists
-├── prompts.dvc                # Tracks: AI prompt templates
-├── ground_truth_sheets.dvc    # Tracks: validated security findings
-├── testing-data-nvrs.yaml.dvc # Tracks: test package data
-│
-└── app/                       # API server
-    ├── main.py                # FastAPI application
-    ├── requirements.txt       # Python dependencies
-    ├── Dockerfile             # Container build
-    └── deploy/                # OpenShift manifests
-```
-
----
-
 ## ⚙️ Configuration
 
 ### Environment Variables
