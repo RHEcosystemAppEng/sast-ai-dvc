@@ -12,7 +12,7 @@ This repository serves as the **central data hub** for the [SAST-AI-Workflow](ht
 
 | Dataset | Purpose |
 |---------|---------|
-| **Prompts** | AI prompt templates used by the SAST analysis engine |
+| **Prompts** | AI prompt templates used by the SAST-AI-Workflow project |
 | **Known Non-Issues** | Curated lists of false positives per package — prevents the AI from flagging known safe patterns |
 | **Ground Truth Sheets** | Validated security findings used for training and evaluation |
 | **Testing Data (NVRs)** | Package Name-Version-Release data for testing |
