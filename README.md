@@ -112,7 +112,7 @@ curl http://localhost:8000/health
 
 ---
 
-## 🖥️ Running the API Server
+## 🖥️ Running the DVC API Server
 
 ### Local Development
 
