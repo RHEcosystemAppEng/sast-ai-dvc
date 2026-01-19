@@ -94,7 +94,7 @@ dvc get . known-non-issues-el10/adcli/ignore.err -o ./ignore.err
 dvc get . prompts/sast-ai-prompts.yaml --rev v2.0.0 -o ./prompts.yaml
 ```
 
-### Using the API Server
+### Using the DVC API Server
 
 ```bash
 # Get known non-issues for a package
