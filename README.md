@@ -1,94 +1,228 @@
-# DVC Data Repository
+# 🗂️ SAST-AI Data Repository
 
-Version-controlled data storage using DVC with S3/MinIO backend.
+> **Version-controlled data storage for the SAST-AI project** — keeping prompts, known issues, and test data organized, versioned, and accessible.
 
-## How It Works
+---
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant API as API Server
-    participant Git as Git Repository
-    participant S3 as S3 / MinIO
+## 📖 What is This Repository?
 
-    User->>API: GET /file?path=prompts/file.yaml&rev=v2.0
-    API->>Git: Fetch .dvc files at revision v2.0
-    Git-->>API: Return .dvc tracking info (file hash)
-    API->>S3: Fetch actual data by hash
-    S3-->>API: Return file content
-    API-->>User: Return file content
-```
+This repository serves as the **central data hub** for the [SAST-AI-Workflow](https://github.com/RHEcosystemAppEng/sast-ai-workflow) project (Static Application Security Testing with AI).
 
-**What's stored where:**
+> **Note:** This repository contains only DVC metadata/pointer files (`.dvc` files). The actual data files are stored in S3/MinIO remote storage.
 
-| Location | What | Example |
-|----------|------|---------|
-| **Git** | DVC config + tracking files | `.dvc/config`, `prompts.dvc` |
-| **S3/MinIO** | Actual data files | prompts, known-non-issues, etc. |
+### Data Access & Storage
 
-## Using DVC CLI
+The actual datasets are stored in a private S3-compatible storage (MinIO). To access the data:
+
+- **Existing team members:** Contact the team to get S3 credentials configured in your DVC remote settings
+- **Fresh deployment:** You'll need to set up your own S3/MinIO bucket and populate it with your datasets, then configure the DVC remote to point to your storage
+
+**Storage requirements (approximate):**
+- Current dataset size: ~50-100 MB total
+- Recommended bucket allocation: 1 GB (to accommodate versioned history and future growth)
+
+### Why DVC?
+
+When building AI systems, you often deal with **large files** that slow down Git, **frequently changing data** that needs version history, and **data & code synchronization** challenges.
+
+**DVC (Data Version Control)** extends Git to handle data files. Think of it as "Git for Data."
+
+![DVC Architecture](docs/images/dvc-architecture.png)
+
+<table>
+<tr>
+<td width="50%">
+
+**🗃️ Git stores (lightweight)**
+- `.dvc` pointer files (~100 bytes each)
+- Configuration & code
+- Full version history
+
+</td>
+<td width="50%">
+
+**☁️ S3/MinIO stores (scalable)**
+- Actual data files (any size)
+- Deduplicated storage
+- Fast parallel downloads
+
+</td>
+</tr>
+</table>
+
+### Data We Manage
+
+| Dataset | Format | Purpose |
+|---------|--------|---------|
+| **Prompts** | YAML files | AI prompt templates used by the SAST-AI-Workflow project |
+| **Known Non-Issues** | Text files (from GitLab repos) | Curated lists of false positives per package — prevents the AI from flagging known safe patterns |
+| **Ground Truth Sheets** | Excel files (.xlsx) | Human-validated security findings used as accuracy benchmarks — when prompts/code change, compare results against these to detect regressions |
+| **Testing Data (NVRs)** | YAML files | Package Name-Version-Release lists defining which packages to analyze during testing runs |
+
+---
+
+## 🔄 How It All Connects
+
+![API Flow](docs/images/api-flow.png)
+
+> **Note:** The "API Server" in the diagram refers to the **DVC FastAPI Server** included in this repository (see `app/` folder). This is a lightweight Python service that wraps DVC operations, allowing other services (like the SAST-AI Orchestrator) to fetch versioned data via HTTP without installing DVC themselves.
+
+### Where Things Live
+
+| Location | What's Stored | Example |
+|----------|---------------|---------|
+| **Git** | DVC config + tracking files (lightweight) | `.dvc/config`, `prompts.dvc` |
+| **S3/MinIO** | Actual data files (any size) | prompt YAML files, ignore lists |
+
+---
+
+## 🚀 How to Use
+
+### Prerequisites
+
+Install [DVC](https://dvc.org/doc/install) (Data Version Control):
 
 ```bash
-# Pull all data
+# Using pip
+pip install dvc[s3]
+
+# Or using Homebrew (macOS)
+brew install dvc
+```
+
+### Using DVC CLI
+
+```bash
+# Clone the repository
+git clone <repo-url>
+cd sast-ai-dvc
+
+# Pull all tracked data files
 dvc pull
 
-# Get specific file
+# Get a specific file
 dvc get . known-non-issues-el10/adcli/ignore.err -o ./ignore.err
 
-# Get at specific revision
+# Get a file at a specific version
 dvc get . prompts/sast-ai-prompts.yaml --rev v2.0.0 -o ./prompts.yaml
 ```
 
-## Using API Server
+### Using the DVC API Server
 
-### Run Locally
+```bash
+# Get known non-issues for a package
+curl http://localhost:8000/known-non-issues-el10/adcli
+
+# Get prompts file
+curl http://localhost:8000/prompts/sast-ai-prompts.yaml
+
+# Get file at specific version
+curl "http://localhost:8000/file?path=prompts/sast-ai-prompts.yaml&rev=v2.0"
+
+# Health check
+curl http://localhost:8000/health
+```
+
+---
+
+## 🖥️ Running the DVC API Server
+
+### Local Development
+
 ```bash
 cd app
 pip install -r requirements.txt
 
+# Set required environment variables
 export GIT_REPO_URL=https://github.com/your-org/dvc-repo.git
 export AWS_ACCESS_KEY_ID=your-key
 export AWS_SECRET_ACCESS_KEY=your-secret
 
+# Start the server
 python main.py
 ```
 
-### Endpoints
-```bash
-# Get file
-curl http://localhost:8000/known-non-issues-el10/adcli
-curl "http://localhost:8000/file?path=prompts/sast-ai-prompts.yaml&rev=v2.0"
-
-# Check exists
-curl "http://localhost:8000/exists?path=prompts/sast-ai-prompts.yaml"
-
-# Health
-curl http://localhost:8000/health
-```
-
 ### Deploy to OpenShift
+
 ```bash
 cd app/deploy
-# Edit secret.yaml with: GIT_REPO_URL, AWS credentials
+
+# Edit secret.yaml with your credentials
 oc apply -f secret.yaml
 oc apply -f deployment.yaml
 ```
 
-## Repository Structure
+See [app/deploy/README.md](app/deploy/README.md) for detailed deployment instructions.
 
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GIT_REPO_URL` | ✅ | Git repository URL (remote or local path) |
+| `AWS_ACCESS_KEY_ID` | ✅ | S3/MinIO access key |
+| `AWS_SECRET_ACCESS_KEY` | ✅ | S3/MinIO secret key |
+| `LOG_LEVEL` | ❌ | Logging level (default: `INFO`) |
+
+---
+
+## 📚 Common Workflows
+
+### Adding New Data
+
+```bash
+# Add a new file to DVC tracking
+dvc add my-new-dataset/
+
+# Commit the .dvc file to Git
+git add my-new-dataset.dvc .gitignore
+git commit -m "Add new dataset"
+
+# Push data to remote storage
+dvc push
+
+# Push Git changes
+git push
 ```
-├── .dvc/config                # S3/MinIO connection config
-├── known-non-issues-el10.dvc  # Tracks known-non-issues data
-├── prompts.dvc                # Tracks prompts data
-├── ground_truth_sheets.dvc    # Tracks ground truth data
-└── app/                       # API server code
+
+### Updating Existing Data
+
+```bash
+# Make your changes to the data files
+# ...
+
+# DVC detects changes automatically
+dvc add known-non-issues-el10/
+
+# Commit and push
+git add known-non-issues-el10.dvc
+git commit -m "Update known non-issues"
+dvc push
+git push
 ```
 
-## Configuration
+### Accessing Historical Versions
 
-| Variable | Description |
-|----------|-------------|
-| `GIT_REPO_URL` | Git repository URL (required) |
-| `AWS_ACCESS_KEY_ID` | S3 access key (required) |
-| `AWS_SECRET_ACCESS_KEY` | S3 secret key (required) |
+```bash
+# Via CLI
+dvc get . prompts/sast-ai-prompts.yaml --rev v1.0.0 -o ./old-prompts.yaml
 
+# Via API
+curl "http://localhost:8000/file?path=prompts/sast-ai-prompts.yaml&rev=v1.0.0"
+```
+
+---
+
+## 🔗 Related Resources
+
+- [DVC Documentation](https://dvc.org/doc) — Official DVC guides
+- [DVC Get Started Tutorial](https://dvc.org/doc/start) — Learn DVC basics
+
+---
+
+## 📝 License
+
+See [LICENSE](LICENSE) for details.
