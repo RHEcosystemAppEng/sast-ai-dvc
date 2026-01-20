@@ -10,6 +10,17 @@ This repository serves as the **central data hub** for the [SAST-AI-Workflow](ht
 
 > **Note:** This repository contains only DVC metadata/pointer files (`.dvc` files). The actual data files are stored in S3/MinIO remote storage.
 
+### Data Access & Storage
+
+The actual datasets are stored in a private S3-compatible storage (MinIO). To access the data:
+
+- **Existing team members:** Contact the team to get S3 credentials configured in your DVC remote settings
+- **Fresh deployment:** You'll need to set up your own S3/MinIO bucket and populate it with your datasets, then configure the DVC remote to point to your storage
+
+**Storage requirements (approximate):**
+- Current dataset size: ~50-100 MB total
+- Recommended bucket allocation: 1 GB (to accommodate versioned history and future growth)
+
 ### Why DVC?
 
 When building AI systems, you often deal with **large files** that slow down Git, **frequently changing data** that needs version history, and **data & code synchronization** challenges.
@@ -41,18 +52,20 @@ When building AI systems, you often deal with **large files** that slow down Git
 
 ### Data We Manage
 
-| Dataset | Purpose |
-|---------|---------|
-| **Prompts** | AI prompt templates used by the SAST-AI-Workflow project |
-| **Known Non-Issues** | Curated lists of false positives per package — prevents the AI from flagging known safe patterns |
-| **Ground Truth Sheets** | Validated security findings used for training and evaluation |
-| **Testing Data (NVRs)** | Package Name-Version-Release data for testing |
+| Dataset | Format | Purpose |
+|---------|--------|---------|
+| **Prompts** | YAML files | AI prompt templates used by the SAST-AI-Workflow project |
+| **Known Non-Issues** | Text files (from GitLab repos) | Curated lists of false positives per package — prevents the AI from flagging known safe patterns |
+| **Ground Truth Sheets** | Excel files (.xlsx) | Human-validated security findings used as accuracy benchmarks — when prompts/code change, compare results against these to detect regressions |
+| **Testing Data (NVRs)** | YAML files | Package Name-Version-Release lists defining which packages to analyze during testing runs |
 
 ---
 
 ## 🔄 How It All Connects
 
 ![API Flow](docs/images/api-flow.png)
+
+> **Note:** The "API Server" in the diagram refers to the **DVC FastAPI Server** included in this repository (see `app/` folder). This is a lightweight Python service that wraps DVC operations, allowing other services (like the SAST-AI Orchestrator) to fetch versioned data via HTTP without installing DVC themselves.
 
 ### Where Things Live
 
