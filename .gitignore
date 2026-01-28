@@ -39,3 +39,4 @@ test_output/
 *-ignore.err
 v1.yaml
 v2.yaml
+/patterns

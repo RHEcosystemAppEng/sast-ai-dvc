@@ -1,0 +1,6 @@
+outs:
+- md5: 8b4ff5688249a126edd908ef1583e7db.dir
+  size: 232680
+  nfiles: 9
+  hash: md5
+  path: patterns
