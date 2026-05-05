@@ -2,5 +2,5 @@
     remote = minio-s3-input-data
 ['remote "minio-s3-input-data"']
     url = s3://dvc-storage/
-    endpointurl = http://minio-api-minio.apps.appeng.clusters.se-apps.redhat.com
+    endpointurl = http://sast-ai-minio-api-sast-ai-mlops.apps.appeng-lab01.accl-001.lab.rdu2.dc.redhat.com
     ssl_verify = false
